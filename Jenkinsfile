@@ -13,7 +13,7 @@ pipeline {
                 sh '''
                     ls -la
                     node --version
-                    npm --verison
+                    npm --version
                     npm ci
                     npm run build
                     ls -la
