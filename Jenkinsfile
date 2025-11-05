@@ -22,7 +22,7 @@ pipeline {
             }
         }
 
-        stage('Tests') {
+       
             
                 stage('Unit tests') {
                     agent {
@@ -69,7 +69,7 @@ pipeline {
                     }
                 }
             
-        }
+        
 
         stage('Deploy') {
             agent {
