@@ -65,13 +65,31 @@ pipeline {
                     }
                     post {
                         always {
-                            publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, icon: '', keepAll: false, reportDir: 'playwright-report', reportFiles: 'index.html', reportName: 'Playwright HTML Report', reportTitles: '', useWrapperFileDirectly: true])
+                            publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, icon: '', keepAll: false, reportDir: 'playwright-report', reportFiles: 'index.html', reportName: 'Playwright local', reportTitles: '', useWrapperFileDirectly: true])
                         }
                     }
                 }
             }
         }
-         stage('Deploy') {
+        stage('Deploy Staging') {
+            agent {
+                docker {
+                    image 'node:18-alpine'
+                    reuseNode true
+                }
+            }
+            steps {
+                sh '''
+                    npm install netlify-cli
+                    node_modules/.bin/netlify --version
+                    echo "Deploy to Staging SITE_ID: $NETLIFY_SITE_ID"
+                    node_modules/.bin/netlify status
+                    node_modules/.bin/netlify deploy --dir=build --no-build
+
+                '''
+            }
+        } 
+         stage('Deploy Prod') {
             agent {
                 docker {
                     image 'node:18-alpine'
@@ -84,8 +102,6 @@ pipeline {
                     node_modules/.bin/netlify --version
                     echo "Deploy to production SITE_ID: $NETLIFY_SITE_ID"
                     node_modules/.bin/netlify status
-                    ls -la build
-                    #node_modules/.bin/netlify deploy --help
                     node_modules/.bin/netlify deploy --dir=build --prod --no-build
 
                 '''
@@ -112,7 +128,7 @@ pipeline {
                     }
                     post {
                         always {
-                            publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, icon: '', keepAll: false, reportDir: 'playwright-report', reportFiles: 'index.html', reportName: 'Playwright HTML Report', reportTitles: '', useWrapperFileDirectly: true])
+                            publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, icon: '', keepAll: false, reportDir: 'playwright-report', reportFiles: 'index.html', reportName: 'Playwright E2Et', reportTitles: '', useWrapperFileDirectly: true])
                         }
                     }
                 }
