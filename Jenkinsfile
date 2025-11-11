@@ -89,6 +89,11 @@ pipeline {
                 '''
             }
         } 
+        stage('Approval'){
+            timeout(time: 30, unit: 'MINUTES') {
+                input cancel: 'No, Cancel deployment', message: 'Are.you ready to deploy?', ok: 'YES, Go ahead'
+            }
+        }
          stage('Deploy Prod') {
             agent {
                 docker {
