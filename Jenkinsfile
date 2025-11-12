@@ -80,19 +80,48 @@ pipeline {
             }
             steps {
                 sh '''
-                    npm install netlify-cli
+                    npm install netlify-cli node-jq
                     node_modules/.bin/netlify --version
                     echo "Deploy to Staging SITE_ID: $NETLIFY_SITE_ID"
                     node_modules/.bin/netlify status
-                    node_modules/.bin/netlify deploy --dir=build --no-build
+                    nnode_modules/.bin/netlify deploy --dir=build --no-build --json > deploy-output.json
+                   
+                '''
+                script {
+                    env.STAGING_URL = sh (script: 'node_modules/.bin/node-jq -r \'.deploy_url\' deploy-output.json', returnStdout: true )
+                }
+            }
+            
+        } 
+        stage('Staging E2E') {
+            agent {
+                docker {
+                    image 'mcr.microsoft.com/playwright:v1.39.0-jammy'
+                    reuseNode true
+                }
+            }
 
+            environment {
+                CI_ENVIRONMENT_URL = "$(env.STAGING_URL)"
+            }
+            steps {
+                sh '''
+                    npm install serve
+                    node_modules/.bin/serve -s build &
+                    sleep 10
+                    npx playwright test --reporter=html
                 '''
             }
-        } 
+            post {
+                always {
+                    publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, icon: '', keepAll: false, reportDir: 'playwright-report', reportFiles: 'index.html', reportName: 'Staging E2E', reportTitles: '', useWrapperFileDirectly: true])
+                }
+            }
+        }
         stage('Approval'){
             steps {
                 timeout(time: 30, unit: 'MINUTES') {
-                    input cancel: 'No, Cancel deployment', message: 'Are.you ready to deploy?', ok: 'YES, Go ahead'
+                    input message: 'Are.you ready to deploy?', ok: 'YES, Go ahead'
                  }
             }
         }
@@ -115,29 +144,29 @@ pipeline {
             }
         } 
         stage('Prod E2E') {
-                    agent {
-                        docker {
-                            image 'mcr.microsoft.com/playwright:v1.39.0-jammy'
-                            reuseNode true
-                        }
-                    }
-
-                    environment {
-                        CI_ENVIRONMENT_URL = 'https://verdant-malabi-303fbf.netlify.app'
-                    }
-                    steps {
-                        sh '''
-                            npm install serve
-                            node_modules/.bin/serve -s build &
-                            sleep 10
-                            npx playwright test --reporter=html
-                        '''
-                    }
-                    post {
-                        always {
-                            publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, icon: '', keepAll: false, reportDir: 'playwright-report', reportFiles: 'index.html', reportName: 'Playwright E2Et', reportTitles: '', useWrapperFileDirectly: true])
-                        }
-                    }
+            agent {
+                docker {
+                    image 'mcr.microsoft.com/playwright:v1.39.0-jammy'
+                    reuseNode true
                 }
+            }
+
+            environment {
+                CI_ENVIRONMENT_URL = 'https://verdant-malabi-303fbf.netlify.app'
+            }
+            steps {
+                sh '''
+                    npm install serve
+                    node_modules/.bin/serve -s build &
+                    sleep 10
+                    npx playwright test --reporter=html
+                '''
+            }
+            post {
+                always {
+                    publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, icon: '', keepAll: false, reportDir: 'playwright-report', reportFiles: 'index.html', reportName: 'Prod E2E', reportTitles: '', useWrapperFileDirectly: true])
+                }
+            }
+        }
     }
 }
