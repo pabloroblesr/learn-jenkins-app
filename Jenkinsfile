@@ -84,7 +84,7 @@ pipeline {
                     node_modules/.bin/netlify --version
                     echo "Deploy to Staging SITE_ID: $NETLIFY_SITE_ID"
                     node_modules/.bin/netlify status
-                    nnode_modules/.bin/netlify deploy --dir=build --no-build --json > deploy-output.json
+                    node_modules/.bin/netlify deploy --dir=build --no-build --json > deploy-output.json
                    
                 '''
                 script {
@@ -139,7 +139,6 @@ pipeline {
                     echo "Deploy to production SITE_ID: $NETLIFY_SITE_ID"
                     node_modules/.bin/netlify status
                     node_modules/.bin/netlify deploy --dir=build --prod --no-build
-
                 '''
             }
         } 
