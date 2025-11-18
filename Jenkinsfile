@@ -19,7 +19,8 @@ pipeline {
                 withCredentials([usernamePassword(credentialsId: 'my-aws', passwordVariable: 'AWS_SECRET_ACCESS_KEY', usernameVariable: 'AWS_ACCESS_KEY_ID')]) {
                     sh '''
                         aws --version
-                        aws s3 ls
+                        echo "hello S3!" > index.html
+                        aws s3 cp index.html s3://learn-jenkins-20251115/index.html
                     '''
                 }
             }
@@ -42,7 +43,7 @@ pipeline {
                 '''
             }
         } 
-        stage('Run Tests') {
+       /* stage('Run Tests') {
             parallel {
                 stage('Unit Tests') {
                     agent {
@@ -140,6 +141,6 @@ pipeline {
                     publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, icon: '', keepAll: false, reportDir: 'playwright-report', reportFiles: 'index.html', reportName: 'Prod E2E', reportTitles: '', useWrapperFileDirectly: true])
                 }
             }
-        }
+        }*/
     }
 }
