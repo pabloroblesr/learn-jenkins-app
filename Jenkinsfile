@@ -3,6 +3,7 @@ pipeline {
 
     environment {
         REACT_APP_VERSION = "1.0.$BUILD_ID"
+        APP_NAME='myjenkinsapp'
         AWS_DEFAULT_REGION = 'us-west-2'
         AWS_ECS_CLUSTER = 'learnJenkinsapp-Cluster-Prod'
         AWS_ECS_SERVICE = 'learnJenkinsapp-service-TD-Prod'
@@ -42,7 +43,7 @@ pipeline {
                     yum update -y
                     yum install docker -y
                     #amazon-linux-extras install docker
-                    docker build -t myjenkinsapp .
+                    docker build -t $APP_NAME:$REACT_APP_VERSION .
 
                     '''
             }
@@ -51,7 +52,7 @@ pipeline {
             agent{
                 docker{
                     image 'my-aws-cli'
-                    args "-u root --entrypoint=''"
+                    args "--entrypoint=''"
                     reuseNode true
                 }
             }
