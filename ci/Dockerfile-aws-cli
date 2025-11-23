@@ -1,0 +1,5 @@
+FROM aws-cli
+RUN yum update -y
+RUN yum install docker -y
+
+
