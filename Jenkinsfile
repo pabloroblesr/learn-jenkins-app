@@ -13,7 +13,7 @@ pipeline {
     }
 
     stages {
-                stage('Build') {
+        stage('Build') {
             agent {
                 docker {
                     image 'node:18-alpine'
@@ -29,28 +29,7 @@ pipeline {
                     npm run build
                     ls -la
                 '''
-            }
-        }
-        stage('Build Docker image') {
-            agent{
-                docker{
-                    image 'my-aws-cli'
-                    args "-u root -v /var/run/docker.sock:/var/run/docker.sock --entrypoint=''"
-                    reuseNode true
-                }
-            }
-            steps{
-                withCredentials([usernamePassword(credentialsId: 'my-aws', passwordVariable: 'AWS_SECRET_ACCESS_KEY', usernameVariable: 'AWS_ACCESS_KEY_ID')]) {
-                    sh '''
-                        yum update -y
-                        yum install docker -y
-                        #amazon-linux-extras install docker
-                        docker build -t $AWS_DOCKER_REGISTRY/$APP_NAME:$REACT_APP_VERSION .
-                        aws ecr get-login-password | docker login --username AWS --password-stdin  $AWS_DOCKER_REGISTRY
-                        docker push $AWS_DOCKER_REGISTRY/$APP_NAME:$REACT_APP_VERSION
-                        '''
-                }
-            }
+            }       
         }
        stage('Deploy to AWS'){
             agent{
@@ -65,11 +44,11 @@ pipeline {
                     sh '''
                         aws --version
                         #yum install jq -y
-                        #aws ecs register-task-definition --cli-input-json file://aws/task-definition-prod.json
-                        LATEST_TD_REVISION=$(aws ecs register-task-definition --cli-input-json file://aws/task-definition-prod.json | jq '.taskDefinition.revision')
-                        echo "this the latest : $LATEST_TD_REVISION" 
-                        aws ecs update-service --cluster $AWS_ECS_CLUSTER --service $AWS_ECS_SERVICE --task-definition $AWS_ECS_TASK_DEF:$LATEST_TD_REVISION
-                        aws ecs wait services-stable --cluster $AWS_ECS_CLUSTER --services $AWS_ECS_SERVICE
+                        aws ecs register-task-definition --cli-input-json file://aws/task-definition-prod.json
+                        #LATEST_TD_REVISION=$(aws ecs register-task-definition --cli-input-json file://aws/task-definition-prod.json | jq '.taskDefinition.revision')
+                        #echo "this the latest : $LATEST_TD_REVISION" 
+                        #aws ecs update-service --cluster $AWS_ECS_CLUSTER --service $AWS_ECS_SERVICE --task-definition $AWS_ECS_TASK_DEF:$LATEST_TD_REVISION
+                        #aws ecs wait services-stable --cluster $AWS_ECS_CLUSTER --services $AWS_ECS_SERVICE
 
                     '''
                 }
