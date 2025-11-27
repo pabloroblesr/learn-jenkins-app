@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         REACT_APP_VERSION = "1.0.$BUILD_ID"
-        APP_NAME='myjenkinsapp'
+        APP_NAME='learnjenkinsapp'
         AWS_DEFAULT_REGION = 'us-west-2'
         AWS_DOCKER_REGISTRY = '703420526575.dkr.ecr.us-west-2.amazonaws.com'
         AWS_ECS_CLUSTER = 'learnJenkinsapp-Cluster-Prod'
@@ -42,9 +42,7 @@ pipeline {
             }
             steps{
                 sh '''
-                    yum update -y
-                    yum install docker -y
-                    docker build  -t my-jenkinsapp .
+                    docker build  -t $APP_NAME:$REACT_APP_VERSION .
                     '''
             }
         }
@@ -61,7 +59,6 @@ pipeline {
                 withCredentials([usernamePassword(credentialsId: 'my-aws', passwordVariable: 'AWS_SECRET_ACCESS_KEY', usernameVariable: 'AWS_ACCESS_KEY_ID')]) {
                     sh '''
                         aws --version
-                        #yum install jq -y
                         aws ecs register-task-definition --cli-input-json file://aws/task-definition-prod.json
                         LATEST_TD_REVISION=$(aws ecs register-task-definition --cli-input-json file://aws/task-definition-prod.json | jq '.taskDefinition.revision')
                         echo "this the latest : $LATEST_TD_REVISION" 
