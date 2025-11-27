@@ -12,7 +12,8 @@
                     "containerPort": 80,
                     "hostPort": 80,
                     "protocol": "tcp",
-                    "appProtocol": "http"
+                    "appProtocol": "http",
+                    "name": "nginx-80-tcp"
                 }
             ],
             "essential": true
