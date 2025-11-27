@@ -8,12 +8,36 @@ pipeline {
         AWS_DOCKER_REGISTRY = '703420526575.dkr.ecr.us-west-2.amazonaws.com'
         AWS_ECS_CLUSTER = 'learnJenkinsapp-Cluster-Prod'
         AWS_ECS_SERVICE = 'learnJenkinsapp-service-TD-Prod'
-        AWS_ECS_TASK_DEF = 'learnJenkinsapp-TaskDefinition-Prod'
+        AWS_ECS_TASK_DEF = 'LearnJenkinsapp-TaskDefinition-Prod'
 
     }
 
     stages {
-       
+         stage('Build') {
+            agent {
+                docker {
+                    image 'node:18-alpine'
+                    reuseNode true
+                }
+            }
+            steps {
+                sh '''
+                    ls -la
+                    node --version
+                    npm --version
+                    npm ci
+                    npm run build
+                    ls -la
+                '''
+            }       
+        }
+
+        stage('Build Docker image') {
+            steps{
+                sh 'docker build  -t my-jenkinsapp .'
+            }
+        }
+
        stage('Deploy to AWS'){
             agent{
                 docker{
@@ -37,24 +61,6 @@ pipeline {
                     '''
                 }
             }
-        }
-         stage('Build') {
-            agent {
-                docker {
-                    image 'node:18-alpine'
-                    reuseNode true
-                }
-            }
-            steps {
-                sh '''
-                    ls -la
-                    node --version
-                    npm --version
-                    npm ci
-                    npm run build
-                    ls -la
-                '''
-            }       
         }
     }
 }
