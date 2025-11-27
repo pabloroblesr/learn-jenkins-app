@@ -8,7 +8,7 @@ pipeline {
         AWS_DOCKER_REGISTRY = '703420526575.dkr.ecr.us-west-2.amazonaws.com'
         AWS_ECS_CLUSTER = 'learnJenkinsapp-Cluster-Prod'
         AWS_ECS_SERVICE = 'learnJenkinsapp-service-TD-Prod'
-        AWS_ECS_TASK_DEF = 'LearnJenkinsapp-TaskDefinition-Prod'
+        AWS_ECS_TASK_DEF = 'LearnJenkinsApp-TaskDefinition-Prod'
 
     }
 
